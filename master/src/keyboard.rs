@@ -1,4 +1,5 @@
 use num_enum::{TryFromPrimitive, TryFromPrimitiveError};
+use serde::{Deserialize, Serialize};
 use usbd_hid::descriptor::{KeyboardReport, SerializedDescriptor};
 
 const MODIFIER_NONE: u8 = 0x0;
@@ -12,7 +13,7 @@ const MODIFIER_RIGHT_ALT: u8 = 0x40;
 const MODIFIER_RIGHT_GUI: u8 = 0x80;
 
 #[repr(u16)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum KeyPress {
     ErrorRollOver = 0x01,
     POSTFail = 0x02,
@@ -219,7 +220,7 @@ impl KeyPress {
 }
 
 #[repr(u8)]
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Copy, TryFromPrimitive, Serialize, Deserialize)]
 pub enum ModifierKey {
     LeftControl = 0xE0,
     LeftShift = 0xE1,
@@ -231,19 +232,28 @@ pub enum ModifierKey {
     RightGUI = 0xE7,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct KeyMapping {
     pub press: Option<KeyMap>,
     pub held: Option<KeyMap>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct KeyMap {
     pub key: KeyPress,
     pub modifiers: u8,
 }
 
+pub const KEY_MAP_EMPTY: [KeyMapping; 56] = [KeyMapping {
+    press: None,
+    held: None,
+}; 56];
+
 pub const KEY_MAP: [KeyMapping; 56] = [
+    KeyMapping {
+        press: None,
+        held: None,
+    },
     KeyMapping {
         press: Some(KeyMap {
             key: KeyPress::Keyboard1,
@@ -281,7 +291,7 @@ pub const KEY_MAP: [KeyMapping; 56] = [
     },
     KeyMapping {
         press: Some(KeyMap {
-            key: KeyPress::Keyboard6,
+            key: KeyPress::Tab,
             modifiers: MODIFIER_NONE,
         }),
         held: None,
@@ -323,9 +333,357 @@ pub const KEY_MAP: [KeyMapping; 56] = [
     },
     KeyMapping {
         press: Some(KeyMap {
+            key: KeyPress::LeftShift,
+            modifiers: MODIFIER_LEFT_SHIFT,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::A,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::S,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::D,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::F,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::G,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::LeftControl,
+            modifiers: MODIFIER_LEFT_CTRL,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Z,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::X,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::C,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::V,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::B,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    // Thumb-keys
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::LayerHold1,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Escape,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Home,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Space,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    // Right Half
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Keyboard6,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Keyboard7,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Keyboard8,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Keyboard9,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Keyboard0,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::DeleteForward,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
             key: KeyPress::Y,
             modifiers: MODIFIER_NONE,
         }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::U,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::I,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::O,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::P,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::LeftBrace,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::H,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::J,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::K,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::L,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Semicolon,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Apostrophe,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::N,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::M,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Comma,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Dot,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Keyboard7,
+            modifiers: MODIFIER_LEFT_SHIFT,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::Equal,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: None,
+        held: None,
+    },
+    KeyMapping {
+        press: None,
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::DeleteBackspace,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+    KeyMapping {
+        press: Some(KeyMap {
+            key: KeyPress::ReturnEnter,
+            modifiers: MODIFIER_NONE,
+        }),
+        held: None,
+    },
+];
+
+pub const KEY_MAP_SYMBOL: [KeyMapping; 56] = [
+    KeyMapping {
+        press: None,
+        held: None,
+    },
+    KeyMapping {
+        press: None,
+        held: None,
+    },
+    KeyMapping {
+        press: None,
+        held: None,
+    },
+    KeyMapping {
+        press: None,
+        held: None,
+    },
+    KeyMapping {
+        press: None,
+        held: None,
+    },
+    KeyMapping {
+        press: None,
+        held: None,
+    },
+    KeyMapping {
+        press: None,
+        held: None,
+    },
+    KeyMapping {
+        press: None,
+        held: None,
+    },
+    KeyMapping {
+        press: None,
+        held: None,
+    },
+    KeyMapping {
+        press: None,
+        held: None,
+    },
+    KeyMapping {
+        press: None,
+        held: None,
+    },
+    KeyMapping {
+        press: None,
         held: None,
     },
     KeyMapping {
