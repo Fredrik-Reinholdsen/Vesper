@@ -3,9 +3,8 @@
 
 use common::button_array::{ButtonArray, KeyEvent};
 use common::command::SlaveEvent;
+use embassy_futures::join::join3;
 use embassy_rp::block::ImageDef;
-use heapless::Vec;
-use serde::{Deserialize, Serialize};
 
 use defmt::*;
 use embassy_executor::Spawner;
@@ -16,6 +15,8 @@ use embassy_rp::pio::{InterruptHandler, Pio};
 use embassy_rp::pio_programs::ws2812::{PioWs2812, PioWs2812Program};
 use embassy_rp::uart::{BufferedInterruptHandler, BufferedUart, BufferedUartRx, Config};
 use embassy_rp::{Peripherals, bind_interrupts};
+use embassy_sync::blocking_mutex::raw::NoopRawMutex;
+use embassy_sync::channel::Channel;
 use embassy_time::{Duration, Instant, Ticker, Timer};
 use embedded_hal_1::digital::OutputPin;
 use embedded_io_async::{Read, Write};
@@ -121,17 +122,36 @@ async fn main(spawner: Spawner) {
 
     let mut buttons = ButtonArray::new(input_keys, Duration::from_millis(1));
     let mut buf: [u8; 512] = [0; 512];
-    let mut watchdog_ticker = Ticker::every(Duration::from_millis(100));
-    loop {
-        let evt = match select(watchdog_ticker.next(), buttons.wait_key_event()).await {
-            Either::First(_) => SlaveEvent::Watchdog,
-            Either::Second(evt) => SlaveEvent::KeyEvent(evt),
-        };
-        let s = to_slice(&evt, &mut buf[1..]).unwrap();
-        let msg_len = s.len();
-        buf[0] = msg_len as u8;
-        let _ = uart.write_all(&buf[..msg_len + 1]).await;
-    }
+    let evt_channel = Channel::<NoopRawMutex, SlaveEvent, 3>::new();
+    let evt_tx = evt_channel.sender();
+
+    let watchdog_fut = async {
+        let mut watchdog_ticker = Ticker::every(Duration::from_millis(100));
+        loop {
+            watchdog_ticker.next().await;
+            evt_tx.send(SlaveEvent::Watchdog).await;
+        }
+    };
+
+    let key_fut = async {
+        loop {
+            let evt = buttons.wait_key_event().await;
+            evt_tx.send(SlaveEvent::KeyEvent(evt)).await;
+        }
+    };
+
+    let evt_rx = evt_channel.receiver();
+    let uart_fut = async {
+        loop {
+            let evt = evt_rx.receive().await;
+            let s = to_slice(&evt, &mut buf[1..]).unwrap();
+            let msg_len = s.len();
+            buf[0] = msg_len as u8;
+            let _ = uart.write_all(&buf[..msg_len + 1]).await;
+        }
+    };
+
+    join3(uart_fut, key_fut, watchdog_fut).await;
 }
 
 #[embassy_executor::task]
